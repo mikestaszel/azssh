@@ -91,7 +91,6 @@ func main() {
 
 	if len(os.Args) == 3 && os.Args[1] == "ssh" {
 		instanceName := os.Args[2]
-		fmt.Println("SSH connection information:")
 		instance, _ := getInstanceByName(ec2Service, instanceName)
 
 		// TODO: if the instance is off, prompt user - should it be turned on? if yes, wait 60 seconds then retry
