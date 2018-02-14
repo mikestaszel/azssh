@@ -43,7 +43,7 @@ func getInstanceByName(ec2Service *ec2.EC2, instanceName string) (*ec2.Instance,
 		}
 	}
 
-	return nil, err
+	return nil, fmt.Errorf("could not find instance")
 }
 
 // Get the instance's name.
@@ -68,7 +68,10 @@ func getInstanceState(instance ec2.Instance) (string, error) {
 
 // Start a stopped instance.
 func startInstance(ec2Service *ec2.EC2, instance *ec2.Instance) error {
-	instanceState, _ := getInstanceState(*instance)
+	instanceState, err := getInstanceState(*instance)
+	if err != nil {
+		return err
+	}
 	if instanceState == "shutting-down" || instanceState == "terminated" || instanceState == "stopping" || instanceState == "stopped" {
 		fmt.Errorf("instance stopped or terminated")
 	}
@@ -80,7 +83,7 @@ func startInstance(ec2Service *ec2.EC2, instance *ec2.Instance) error {
 		},
 	}
 
-	_, err := ec2Service.StartInstances(input)
+	_, err = ec2Service.StartInstances(input)
 	if err != nil {
 		return err
 	}
@@ -90,7 +93,11 @@ func startInstance(ec2Service *ec2.EC2, instance *ec2.Instance) error {
 
 // Stop an instance.
 func stopInstance(ec2Service *ec2.EC2, instance *ec2.Instance) error {
-	instanceState, _ := getInstanceState(*instance)
+	instanceState, err := getInstanceState(*instance)
+	if err != nil {
+		return err
+	}
+
 	if instanceState == "shutting-down" || instanceState == "terminated" || instanceState == "stopping" || instanceState == "stopped" {
 		fmt.Errorf("instance stopped or terminated")
 	}
@@ -102,7 +109,7 @@ func stopInstance(ec2Service *ec2.EC2, instance *ec2.Instance) error {
 		},
 	}
 
-	_, err := ec2Service.StopInstances(input)
+	_, err = ec2Service.StopInstances(input)
 	if err != nil {
 		return err
 	}
@@ -112,7 +119,10 @@ func stopInstance(ec2Service *ec2.EC2, instance *ec2.Instance) error {
 
 // Reboot an instance.
 func rebootInstance(ec2Service *ec2.EC2, instance *ec2.Instance) error {
-	instanceState, _ := getInstanceState(*instance)
+	instanceState, err := getInstanceState(*instance)
+	if err != nil {
+		return err
+	}
 	if instanceState == "shutting-down" || instanceState == "terminated" || instanceState == "stopping" || instanceState == "stopped" {
 		fmt.Errorf("instance stopped or terminated")
 	}
@@ -124,7 +134,7 @@ func rebootInstance(ec2Service *ec2.EC2, instance *ec2.Instance) error {
 		},
 	}
 
-	_, err := ec2Service.RebootInstances(input)
+	_, err = ec2Service.RebootInstances(input)
 	if err != nil {
 		return err
 	}
@@ -134,13 +144,13 @@ func rebootInstance(ec2Service *ec2.EC2, instance *ec2.Instance) error {
 
 func printUsage() {
 	fmt.Println("azssh: utility to manage EC2 instances")
-	fmt.Println("usage: azssh ssh instance_name         SSH into instance")
-	fmt.Println("   or: azssh ls                        list instances")
-	fmt.Println("   or: azssh dns                       print public DNS of instance")
-	fmt.Println("   or: azssh start instance_name       start this instance public DNS of instance")
-	fmt.Println("   or: azssh stop instance_name        print public DNS of instance")
-	fmt.Println("   or: azssh restart instance_name     print public DNS of instance")
-	fmt.Println("   or: azssh help                      print this help text")
+	fmt.Println("usage: azssh ssh instance_name        SSH into instance")
+	fmt.Println("   or: azssh ls                       list instances")
+	fmt.Println("   or: azssh dns                      print public DNS of instance")
+	fmt.Println("   or: azssh start instance_name      start this instance public DNS of instance")
+	fmt.Println("   or: azssh stop instance_name       print public DNS of instance")
+	fmt.Println("   or: azssh restart instance_name    print public DNS of instance")
+	fmt.Println("   or: azssh help                     print this help text")
 }
 
 // Main function.
@@ -168,7 +178,7 @@ func main() {
 		}
 
 		sshCmd := fmt.Sprintf("ssh %s@%s", username, publicDns)
-		fmt.Println("running command: ", sshCmd)
+		fmt.Println("running command:", sshCmd)
 
 		cmd := exec.Command("ssh", fmt.Sprintf("%s@%s", username, publicDns))
 		cmd.Stdout = os.Stdout
