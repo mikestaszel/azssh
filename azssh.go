@@ -1,11 +1,11 @@
 package main
 
 import (
-	"os"
 	"fmt"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/aws/aws-sdk-go/aws"
+	"os"
 	"os/exec"
 )
 
@@ -157,7 +157,7 @@ func main() {
 		sshCmd := "ssh ubuntu@" + publicDns
 		fmt.Println("running command: ", sshCmd)
 
-		cmd := exec.Command("ssh", "ubuntu@" + publicDns)
+		cmd := exec.Command("ssh", "ubuntu@"+publicDns)
 		cmd.Stdout = os.Stdout
 		cmd.Stdin = os.Stdin
 		cmd.Stderr = os.Stderr
@@ -187,7 +187,7 @@ func main() {
 		instanceName := os.Args[2]
 		instance, _ := getInstanceByName(ec2Service, instanceName)
 		rebootInstance(ec2Service, instance)
-	} else if len(os.Args) == 2 && (os.Args[1] == "help")  {
+	} else if len(os.Args) == 2 && (os.Args[1] == "help") {
 		printUsage()
 	} else {
 		fmt.Println("Invalid parameters!")
