@@ -78,7 +78,7 @@ func startInstance(ec2Service *ec2.EC2, instance *ec2.Instance) error {
 
 	instanceId := *instance.InstanceId
 	input := &ec2.StartInstancesInput{
-		InstanceIds: []*string{
+		InstanceIds: []*string {
 			aws.String(instanceId),
 		},
 	}
@@ -143,14 +143,16 @@ func rebootInstance(ec2Service *ec2.EC2, instance *ec2.Instance) error {
 }
 
 func printUsage() {
-	fmt.Println("azssh: utility to manage EC2 instances")
-	fmt.Println("usage: azssh ssh instance_name        SSH into instance")
-	fmt.Println("   or: azssh ls                       list instances")
-	fmt.Println("   or: azssh dns                      print public DNS of instance")
-	fmt.Println("   or: azssh start instance_name      start this instance public DNS of instance")
-	fmt.Println("   or: azssh stop instance_name       print public DNS of instance")
-	fmt.Println("   or: azssh restart instance_name    print public DNS of instance")
-	fmt.Println("   or: azssh help                     print this help text")
+	usageStr := "azssh: utility to manage EC2 instances\n\n" +
+		"Usage:\n" +
+		"azssh ssh instance_name        SSH into instance\n" +
+		"azssh ls                       list instances\n" +
+		"azssh dns                      print public DNS of instance\n" +
+		"azssh start instance_name      start this instance\n" +
+		"azssh stop instance_name       stop this instance\n" +
+		"azssh restart instance_name    restart this instance\n" +
+		"azssh help                     print this help text"
+	fmt.Println(usageStr)
 }
 
 // Main function.
@@ -184,17 +186,21 @@ func main() {
 		cmd.Stdout = os.Stdout
 		cmd.Stdin = os.Stdin
 		cmd.Stderr = os.Stderr
-		cmd.Run()
+		_ = cmd.Run()
 	} else if len(os.Args) == 2 && os.Args[1] == "ls" {
 		instances, err := getInstances(ec2Service)
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println("instances:")
-		for _, instance := range instances {
-			instanceName, _ := getInstanceName(instance)
-			instanceState, _ := getInstanceState(instance)
-			fmt.Printf("%s - %s\n", instanceName, instanceState)
+		if len(instances) == 0 {
+			fmt.Println("no instances detected.")
+		} else {
+			fmt.Println("instances:")
+			for _, instance := range instances {
+				instanceName, _ := getInstanceName(instance)
+				instanceState, _ := getInstanceState(instance)
+				fmt.Printf("%s - %s\n", instanceName, instanceState)
+			}
 		}
 	} else if len(os.Args) == 3 && os.Args[1] == "dns" {
 		instanceName := os.Args[2]
@@ -207,27 +213,27 @@ func main() {
 			panic(err)
 		}
 		fmt.Println(publicDns)
-	} else if len(os.Args) == 3 && (os.Args[1] == "up" || os.Args[1] == "start") {
+	} else if len(os.Args) == 3 && (os.Args[1] == "start") {
 		instanceName := os.Args[2]
 		instance, err := getInstanceByName(ec2Service, instanceName)
 		if err != nil {
 			panic(err)
 		}
-		startInstance(ec2Service, instance)
-	} else if len(os.Args) == 3 && (os.Args[1] == "down" || os.Args[1] == "shutdown" || os.Args[1] == "stop") {
+		_ = startInstance(ec2Service, instance)
+	} else if len(os.Args) == 3 && (os.Args[1] == "stop") {
 		instanceName := os.Args[2]
 		instance, err := getInstanceByName(ec2Service, instanceName)
 		if err != nil {
 			panic(err)
 		}
-		stopInstance(ec2Service, instance)
+		_ = stopInstance(ec2Service, instance)
 	} else if len(os.Args) == 3 && (os.Args[1] == "reboot" || os.Args[1] == "restart") {
 		instanceName := os.Args[2]
 		instance, err := getInstanceByName(ec2Service, instanceName)
 		if err != nil {
 			panic(err)
 		}
-		rebootInstance(ec2Service, instance)
+		_ = rebootInstance(ec2Service, instance)
 	} else if len(os.Args) == 2 && (os.Args[1] == "help") {
 		printUsage()
 	} else {

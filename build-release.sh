@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+set -e
+
 platforms=("windows/amd64" "windows/386" "darwin/386" "darwin/amd64" "linux/386" "linux/amd64" "linux/arm" "linux/arm64" "freebsd/386" "freebsd/amd64")
 PACKAGE="azssh"
 
